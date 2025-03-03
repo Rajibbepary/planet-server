@@ -164,6 +164,18 @@ app.get('/customer-orders/:email', verifyToken, async(req, res)=>{
 {
   $unwind: '$plants'
 },
+{
+  $addFields: {
+    name:'$plants.name',
+    image: '$plants.image',
+    category: '$plants.category',
+  }
+},
+{
+  $project:{
+    plants:0,
+  },
+},
 
   ]).toArray()
   res.send(result)
