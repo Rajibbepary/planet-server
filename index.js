@@ -144,7 +144,28 @@ app.patch('/plants/quantity/:id', verifyToken, async(req, res)=>{
 app.get('/customer-orders/:email', verifyToken, async(req, res)=>{
   const email = req.params.email
   const query = {'customer.email' :email}
-  const result = await ordersCollection.find(query).toArray()
+  const result = await ordersCollection.aggregate([
+  {
+    $match: query,
+  },
+{
+  $addFields:{
+    plantId:{$toObjectId: '$plantId'},
+  },
+},
+{
+  $lookup:{
+    from: 'plants',
+    localField: 'plantId',
+    foreignField: '_id',
+    as: 'plants',
+  },
+},
+{
+  $unwind: '$plants'
+},
+
+  ]).toArray()
   res.send(result)
 })
 
