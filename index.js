@@ -105,6 +105,26 @@ async function run() {
       const result = await plantsCollection.insertOne(plant)
       res.send(result)
     })
+//Manage user status and role
+app.patch('/user/:email', verifyToken, async(req, res)=>{
+  const email = req.params.email
+  const query = { email }
+  const user = await usersCollection.findOne(query)
+  if(!user || user?.status === 'Requested') return res.status(400).send('You have already requested, wait for some time.')
+ 
+
+  const updateDos = {
+    $set:{
+      status: 'Requested',
+    },
+  }
+const result = await usersCollection.updateOne(query, updateDos)
+
+res.send(result)
+})
+
+
+
 
     // get all plants from db
     app.get('/plants', async (req, res) => {
@@ -132,10 +152,16 @@ async function run() {
 
 app.patch('/plants/quantity/:id', verifyToken, async(req, res)=>{
   const id = req.params.id
-  const {quantityToUpdate} = req.body
+  const {quantityToUpdate, status} = req.body
   const filter ={_id: new ObjectId(id)}
   let updateDoc = {
     $inc:{ quantity: -quantityToUpdate },
+  }
+
+  if(status ==='increase'){
+     updateDoc = {
+      $inc:{ quantity: quantityToUpdate },
+    }
   }
   const result = await plantsCollection.updateOne(filter, updateDoc)
   res.send(result)
@@ -184,6 +210,8 @@ app.get('/customer-orders/:email', verifyToken, async(req, res)=>{
 app.delete('/orders/:id', verifyToken, async(req, res)=>{
   const id = req.params.id
   const query ={_id: new ObjectId(id)}
+  const order = await ordersCollection.findOne(query)
+if(order.status === 'Delivered') return res.status(409).send('Cannot cancel once the product is delivered !')
   const result = await ordersCollection.deleteOne(query)
   res.send(result)
 })
