@@ -71,13 +71,10 @@ async function run() {
 
 
 //get all-user data
-app.get('/all-user', async(req, res)=>{
-  const result = await usersCollection.find().toArray(
-    res.send(result)
-  )
+app.get('/all-users', verifyToken, async(req, res)=>{
+  const result = await usersCollection.find().toArray()
+  res.send(result)
 })
-
-
 
 
 //get user role
@@ -140,9 +137,6 @@ const result = await usersCollection.updateOne(query, updateDos)
 
 res.send(result)
 })
-
-
-
 
     // get all plants from db
     app.get('/plants', async (req, res) => {
