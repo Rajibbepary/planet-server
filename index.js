@@ -71,10 +71,24 @@ async function run() {
 
 
 //get all-user data
-app.get('/all-users', verifyToken, async(req, res)=>{
-  const result = await usersCollection.find().toArray()
+app.get('/all-users/:email', verifyToken, async(req, res)=>{
+  const email = req.params.email
+  const query = {email: {$ne: email}}
+  const result = await usersCollection.find(query).toArray()
   res.send(result)
 })
+
+//update a user role status
+app.patch('/user/role/:email', verifyToken, async(req, res)=>{
+  const email = req.params.email
+  const { role, status} = req.body
+  const filter = {email}
+  const updateDoc = {
+    $set: { role, status},
+  }
+})
+
+
 
 
 //get user role
