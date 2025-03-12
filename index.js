@@ -59,9 +59,18 @@ const query = {email}
 const result = await usersCollection.findOne(query)
 if(!result || result?.role !== 'admin') return res.status(403).send({message: 'Forbidden Access! Admin Only Actions!'})
   
-
 next()
 }
+
+//verify seller middleware
+const verifySeller = async (req, res, next) =>{
+  const email = req.user?.email
+  const query = {email}
+  const result = await usersCollection.findOne(query)
+  if(!result || result?.role !== 'seller') return res.status(403).send({message: 'Forbidden Access! Seller Only Actions!'})
+    
+  next()
+  }
 
 
     // save or update a user in db
@@ -144,7 +153,7 @@ app.get('/users/role/:email', async(req, res)=>{
     })
 
     // save a plant data in db
-    app.post('/plants', verifyToken, async (req, res) => {
+    app.post('/plants', verifyToken, verifySeller, async (req, res) => {
       const plant = req.body
       const result = await plantsCollection.insertOne(plant)
       res.send(result)
