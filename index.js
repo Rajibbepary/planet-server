@@ -152,6 +152,15 @@ app.get('/users/role/:email', async(req, res)=>{
       }
     })
 
+//get inventory data for seller
+app.get('/plants/seller', verifyToken,verifySeller, async (req, res) => {
+  const email = req.params.email
+  const result = await usersCollection.findOne({ email})
+  res.send ({ role: result?.role})
+})
+
+
+
     // save a plant data in db
     app.post('/plants', verifyToken, verifySeller, async (req, res) => {
       const plant = req.body
