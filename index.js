@@ -154,12 +154,18 @@ app.get('/users/role/:email', async(req, res)=>{
 
 //get inventory data for seller
 app.get('/plants/seller', verifyToken,verifySeller, async (req, res) => {
-  const email = req.params.email
-  const result = await usersCollection.findOne({ email})
-  res.send ({ role: result?.role})
+  const email = req.user.email
+  const result = await plantsCollection.find({ 'seller.email':email}).toArray()
+  res.send (result)
 })
 
-
+//delete a plant from db by seller
+app.delete('/plants/:id', verifyToken, verifySeller, async(req, res)=>{
+  const id = req.params.id
+  const query = {_id: new ObjectId(id)}
+  const result = await plantsCollection.deleteOne(query)
+  res.send(result)
+})
 
     // save a plant data in db
     app.post('/plants', verifyToken, verifySeller, async (req, res) => {
