@@ -232,6 +232,8 @@ app.patch('/plants/quantity/:id', verifyToken, async(req, res)=>{
   res.send(result)
 })
 
+
+//get all order for a specific customer
 app.get('/customer-orders/:email', verifyToken, async(req, res)=>{
   const email = req.params.email
   const query = {'customer.email' :email}
@@ -271,6 +273,46 @@ app.get('/customer-orders/:email', verifyToken, async(req, res)=>{
   ]).toArray()
   res.send(result)
 })
+
+//get all order for a specific seller
+app.get('/seller-orders/:email', verifyToken, verifySeller, async(req, res)=>{
+  const email = req.params.email
+  const query = {seller:email}
+  const result = await ordersCollection.aggregate([
+  {
+    $match: query,
+  },
+{
+  $addFields:{
+    plantId:{$toObjectId: '$plantId'},
+  },
+},
+{
+  $lookup:{
+    from: 'plants',
+    localField: 'plantId',
+    foreignField: '_id',
+    as: 'plants',
+  },
+},
+{
+  $unwind: '$plants'
+},
+{
+  $addFields: {
+    name:'$plants.name',
+  }
+},
+{
+  $project:{
+    plants:0,
+  },
+},
+
+  ]).toArray()
+  res.send(result)
+})
+
 
 app.delete('/orders/:id', verifyToken, async(req, res)=>{
   const id = req.params.id
