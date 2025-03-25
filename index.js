@@ -334,6 +334,13 @@ if(order.status === 'Delivered') return res.status(409).send('Cannot cancel once
   res.send(result)
 })
 
+//admin stat
+app.get('/admin-stat', verifyToken, verifyAdmin, async (req, res)=>{
+const totalUser = await usersCollection.countDocuments({role:'admin'})
+  const totalPlants = await plantsCollection.estimatedDocumentCount()
+  res.send({totalPlants, totalUser})
+
+})
 
 
     // Send a ping to confirm a successful connection
