@@ -338,8 +338,26 @@ if(order.status === 'Delivered') return res.status(409).send('Cannot cancel once
 app.get('/admin-stat', verifyToken, verifyAdmin, async (req, res)=>{
 const totalUser = await usersCollection.countDocuments({role:'admin'})
   const totalPlants = await plantsCollection.estimatedDocumentCount()
-  res.send({totalPlants, totalUser})
+  //const allOrder = await ordersCollection.find().toArray()
+ ///const totalPrice = allOrder.reduce((sum, order) => sum + order.price, 0)
 
+ const orderDetails = await ordersCollection
+ .aggregate([
+  {
+    $group: {
+      _id: null,
+      totalRevenue: { $sum: '$price'},
+      totalOrder: {$sum:1},
+    },
+  },
+  {
+    $project:{
+      _id:0,
+    },
+  }
+ ])
+ .next()
+  res.send({totalPlants, totalUser, ...orderDetails})
 })
 
 
