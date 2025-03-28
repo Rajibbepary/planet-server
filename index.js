@@ -340,7 +340,34 @@ const totalUser = await usersCollection.countDocuments({role:'admin'})
   const totalPlants = await plantsCollection.estimatedDocumentCount()
   //const allOrder = await ordersCollection.find().toArray()
  ///const totalPrice = allOrder.reduce((sum, order) => sum + order.price, 0)
+// generate chart data
+const chartData = await ordersCollection.aggregate([
+  {
+    $group: {
+      _id: {
+        $dateToString: {
+          format: '%Y-%m-%d',
+          date: { $toDate: '$_id' },
+        },
+      },
+      quantity: { $sum: '$quantity' },
+      price: { $sum: '$price' },
+      order: { $sum: 1 },
+    },
+  },
+  {
+    $project: {
+      _id: 0,
+      date: '$_id',
+      quantity: 1,
+      order: 1,
+      price: 1,
+    },
+  },
+]).toArray(); // Use toArray() instead of .next() to fetch results as an array.
 
+
+ // get total revenue, total order
  const orderDetails = await ordersCollection
  .aggregate([
   {
@@ -357,7 +384,7 @@ const totalUser = await usersCollection.countDocuments({role:'admin'})
   }
  ])
  .next()
-  res.send({totalPlants, totalUser, ...orderDetails})
+  res.send({totalPlants, totalUser, ...orderDetails, chartData})
 })
 
 
