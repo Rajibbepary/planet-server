@@ -387,6 +387,19 @@ const chartData = await ordersCollection.aggregate([
   res.send({totalPlants, totalUser, ...orderDetails, chartData})
 })
 
+//create payment intent
+app.post('/create-payment-intent', verifyToken, async (req, res)=>{
+  const {quantity, plantId} = req.body
+  const plant = await plantsCollection.findOne({
+    _id: new ObjectId(plantId),
+  })
+  if(!plant) {
+    return res.status(400).send({message:'Plant Not Found'})
+  }
+  const totalPrice = quantity * plant.price * 100 //total price in cent
+  console.log(totalPrice)
+})
+
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
