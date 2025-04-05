@@ -397,7 +397,7 @@ app.post('/create-payment-intent', verifyToken, async (req, res)=>{
     return res.status(400).send({message:'Plant Not Found'})
   }
   const totalPrice = quantity * plant.price * 100 //total price in cent
-  console.log(totalPrice)
+  res.send({totalPrice})
 })
 
 
